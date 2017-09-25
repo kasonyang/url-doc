@@ -1,0 +1,10 @@
+apply plugin:'java'
+repositories {
+  mavenCentral()
+}
+dependencies {
+	compile 'org.springframework:spring-web:4.3.4.RELEASE'
+  compile 'site.kason:kamons:1.0.1'
+  compile 'site.kason:tempera:0.1.0'
+  testCompile 'junit:junit:4.12'
+}
