@@ -102,6 +102,7 @@ public class UrldocElementVisitor extends AbstractElementVisitor8<Object, Object
       mappings.add(createMapping(pm, basePath,doc));
     }
     for(VariableElement pv:e.getParameters()){
+      //TODO handle @RequestParam,@PathVariable
       String ptype = pv.asType().toString();
       String pname = pv.getSimpleName().toString();
       if(this.isAutowiredParameter(ptype)) continue;
