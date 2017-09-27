@@ -1,10 +1,9 @@
 package site.kason.urldoc;
 
+import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -15,10 +14,12 @@ import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import org.apache.commons.io.FileUtils;
 import site.kason.tempera.engine.Configuration;
 import site.kason.tempera.engine.Engine;
 import site.kason.tempera.engine.Template;
 import site.kason.tempera.loader.ClasspathTemplateLoader;
+import site.kason.tempera.loader.StringTemplateLoader;
 
 /**
  *
@@ -32,17 +33,30 @@ public class AnnotationProcessor extends AbstractProcessor {
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
     //System.out.println("processor called");
     if(roundEnv.processingOver()) return false;
-    String outFile = System.getProperty("urldoc.outfile");
+    String outFile = System.getProperty("urldoc.out.file");
+    String tplFileProperty = System.getProperty("urldoc.template.file");
     if(outFile==null) return false;
     Set<? extends Element> rootEles = roundEnv.getRootElements();
-    System.out.println("root elements:" + rootEles);
+    //System.out.println("root elements:" + rootEles);
     UrldocElementVisitor ev = new UrldocElementVisitor(this.processingEnv);
     for(Element r:rootEles){
       ev.visit(r);
     }
     List<Mapping> mappings = ev.getMappings();
     Configuration conf = new Configuration();
-    conf.setTemplateLoader(new ClasspathTemplateLoader(new String[]{".tpr"}));
+    String tplName = "site.kason.urldoc.template.urls";
+    if(tplFileProperty!=null){
+      try {
+        String tplContent = FileUtils.readFileToString(new File(tplFileProperty), "utf-8");
+        StringTemplateLoader tplLoader = new StringTemplateLoader();
+        tplLoader.addSource(tplName, tplContent);
+        conf.setTemplateLoader(tplLoader);
+      } catch (IOException ex) {
+        throw new RuntimeException(ex);
+      }
+    }else{
+      conf.setTemplateLoader(new ClasspathTemplateLoader(new String[]{".tpr"}));
+    }
     Engine engine = new Engine(conf);
     try {
       Template tpl = engine.compile("site.kason.urldoc.templates.urls");
@@ -54,8 +68,6 @@ public class AnnotationProcessor extends AbstractProcessor {
         fos.flush();
         //System.out.println(out);
       }
-      //r.accept(ev , null);
-      //TODO handle ev result
     } catch (IOException ex) {
       throw new RuntimeException(ex);
     }

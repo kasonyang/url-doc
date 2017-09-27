@@ -1,8 +1,9 @@
 {{var mappings:List<site.kason.urldoc.Mapping>}}
 {{for m in mappings}}
-method:{{for md,ctx in m.methods}}{{if !ctx.first}}|{{/if}}{{md}}{{/for}}
-{{for p in m.paths}}url:{{p}}
-{{/for}}query:{{for pn,pnctx in m.parameters}}{{if !pnctx.first}},{{/if}}{{pn.name}}={{pn.type}}{{/for}}
-{{if m.doc}}remarks:{{m.doc}}{{/if}}
+{{for p in m.paths}}
+{{for md,mdCtx in m.methods}}{{if !mdCtx.first}}|{{/if}}{{md}}{{/for}} {{p}}
+{{/for}}{{for pn,pnCtx in m.parameters}}  {{pn.name}}={{pn.type}}
+{{/for}}
+{{if m.doc}}{{m.doc}}{{/if}}
 -------------------------------------
 {{/for}}

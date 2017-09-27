@@ -11,7 +11,6 @@ import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.AbstractElementVisitor8;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -127,8 +126,13 @@ public class UrldocElementVisitor extends AbstractElementVisitor8<Object, Object
   private Mapping createMapping(RequestMapping rm, String[] basePaths,String doc) {
     Mapping mp = new Mapping();
     mp.setDoc(doc);
-    for (RequestMethod m : rm.method()) {
-      mp.addMethod(m.name());
+    RequestMethod[] methods = rm.method();
+    if(methods.length==0){
+      mp.addMethod("ANY");
+    }else{
+      for (RequestMethod m : methods) {
+        mp.addMethod(m.name());
+      }
     }
     for (String bp : basePaths) {
       for (String p : rm.path()) {
