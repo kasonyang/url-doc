@@ -2,7 +2,7 @@
 {{for m in mappings}}
 {{for p in m.paths}}
 {{for md,mdCtx in m.methods}}{{if !mdCtx.first}}|{{/if}}{{md}}{{/for}} {{p}}
-{{/for}}{{for pn,pnCtx in m.parameters}}  {{pn.name}}={{pn.type}}
+{{/for}}{{for pn,pnCtx in m.parameters}}  {{if pn.required}}*{{/if}}{{pn.name}}={{pn.type}}
 {{/for}}
 {{if m.doc}}{{m.doc}}{{/if}}
 -------------------------------------

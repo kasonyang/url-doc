@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import javax.annotation.Nullable;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -13,9 +14,11 @@ import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.AbstractElementVisitor8;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  *
@@ -101,12 +104,13 @@ public class UrldocElementVisitor extends AbstractElementVisitor8<Object, Object
       mappings.add(createMapping(pm, basePath,doc));
     }
     for(VariableElement pv:e.getParameters()){
-      //TODO handle @RequestParam,@PathVariable
       String ptype = pv.asType().toString();
       String pname = pv.getSimpleName().toString();
       if(this.isAutowiredParameter(ptype)) continue;
+      if(pv.getAnnotation(PathVariable.class)!=null) continue;
+      RequestParam reqParam = pv.getAnnotation(RequestParam.class);
       for(Mapping m:mappings){
-        m.addParameter(new Parameter(pname,ptype));
+        m.addParameter(this.createParameter(reqParam, pname, ptype));
       }
     }
     this.mappingList.addAll(mappings);
@@ -192,6 +196,21 @@ public class UrldocElementVisitor extends AbstractElementVisitor8<Object, Object
   
   private boolean isAutowiredParameter(String type){
     return type.startsWith("org.springframework.") || AUTOWIRED_TYPE_LIST.contains(type);
+  }
+  
+  private Parameter createParameter(@Nullable RequestParam reqParam,String defaultName,String type){
+    boolean required = false;
+    if(reqParam!=null){
+      required = reqParam.required();
+      String name = reqParam.name();
+      String value = reqParam.value();
+      if(name!=null && !name.isEmpty()){
+        defaultName = name;
+      }else if(value!=null && !value.isEmpty() ){
+        defaultName = name;
+      }
+    }
+    return new Parameter(defaultName, type, required);
   }
 
 }
