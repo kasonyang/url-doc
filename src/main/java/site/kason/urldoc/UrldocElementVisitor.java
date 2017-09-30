@@ -13,12 +13,14 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.AbstractElementVisitor8;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  *
@@ -55,8 +57,10 @@ public class UrldocElementVisitor extends AbstractElementVisitor8<Object, Object
 
   @Override
   public Object visitType(TypeElement e, Object p) {
+    Controller controller = e.getAnnotation(Controller.class);
+    RestController restController = e.getAnnotation(RestController.class);
+    boolean isController = controller!=null || restController!=null;
     //System.out.println("visiting type:" + e);
-    //TODO check @Controller
     RequestMapping rm = e.getAnnotation(RequestMapping.class);
     String[] basePath;
     if (rm != null) {
@@ -64,20 +68,12 @@ public class UrldocElementVisitor extends AbstractElementVisitor8<Object, Object
     } else {
       basePath = new String[]{"/"};
     }
-//    for (int i = 0; i < basePath.length; i++) {
-//      if (!basePath[i].endsWith("/")) {
-//        basePath[i] += "/";
-//      }
-//      if (!basePath[i].startsWith("/")) {
-//        basePath[i] = "/" + basePath[i];
-//      }
-//    }
     for (Element ee : e.getEnclosedElements()) {
-      if (ee instanceof ExecutableElement) {
-        ee.accept(this, basePath);
-      } else if (ee instanceof TypeElement) {
+      if (ee instanceof TypeElement) {
         ee.accept(this, p);
-      }
+      } else if(isController && ee instanceof ExecutableElement) {
+        ee.accept(this, basePath);
+      }      
     }
     return null;
   }
