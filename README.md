@@ -1,3 +1,5 @@
+![Maven Central](https://img.shields.io/maven-central/v/site.kason/url-doc.svg)
+
 # What is UrlDoc?
 
 UrlDoc is url document generator for annotation-driven spring web applications.
