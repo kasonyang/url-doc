@@ -1,5 +1,6 @@
 package site.kason.urldoc.example.controller;
 
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,6 +18,11 @@ public class ExampleController {
     @RequestMapping("hello")
     public String hello() {
         return "hello,world";
+    }
+
+    @PostMapping("sayHello")
+    public String sayHello(String word) {
+        return "hello," + word;
     }
 
 }

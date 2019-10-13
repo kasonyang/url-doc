@@ -19,6 +19,7 @@ repositories {
 }
 
 System.setProperty("urldoc.out.file","build/url-doc.txt")
+System.setProperty("urldoc.out.json.file","build/url-doc.json")
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
