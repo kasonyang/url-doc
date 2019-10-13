@@ -23,7 +23,7 @@ System.setProperty("urldoc.out.json.file","build/url-doc.json")
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	compileOnly project(':core')
-	annotationProcessor project(':core')
+	compileOnly project(':url-doc')
+	annotationProcessor project(':url-doc')
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
