@@ -43,6 +43,9 @@ public class AnnotationProcessor extends AbstractProcessor {
       ev.visit(r);
     }
     List<Mapping> mappings = ev.getMappings();
+    if (mappings.isEmpty()) {
+        return false;
+    }
     Configuration conf = new Configuration();
     String tplName = "site.kason.urldoc.template.urls";
     if(tplFileProperty!=null){
