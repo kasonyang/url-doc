@@ -1,27 +1,15 @@
 package site.kason.urldoc;
 
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Nullable;
+import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.*;
+import javax.lang.model.util.AbstractElementVisitor8;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import javax.annotation.Nullable;
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.PackageElement;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.TypeParameterElement;
-import javax.lang.model.element.VariableElement;
-import javax.lang.model.util.AbstractElementVisitor8;
-
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author Kason Yang
@@ -90,14 +78,20 @@ public class UrldocElementVisitor extends AbstractElementVisitor8<Object, Object
         //System.out.println("visiting executable:"+e);
         List<Mapping> mappings = new LinkedList();
         String doc = this.processingEnv.getElementUtils().getDocComment(e);
+        String controller = e.getEnclosingElement().asType().toString();
         for (RequestMapping rm : e.getAnnotationsByType(RequestMapping.class)) {
-            mappings.add(createMapping(rm, basePath, doc));
+            RequestMethod[] reqMethods = rm.method();
+            String[] methods = new String[reqMethods.length];
+            for (int i = 0; i < methods.length; i++) {
+                methods[i] = reqMethods[i].name();
+            }
+            mappings.add(createMapping(methods, rm.path(),rm.value(), basePath, doc, controller));
         }
         for (GetMapping gm : e.getAnnotationsByType(GetMapping.class)) {
-            mappings.add(createMapping(gm, basePath, doc));
+            mappings.add(createMapping(new String[]{RequestMethod.GET.name()}, gm.path(), gm.value(), basePath, doc, controller));
         }
         for (PostMapping pm : e.getAnnotationsByType(PostMapping.class)) {
-            mappings.add(createMapping(pm, basePath, doc));
+            mappings.add(createMapping(new String[]{RequestMethod.POST.name()}, pm.path(), pm.value(), basePath, doc, controller));
         }
         for (VariableElement pv : e.getParameters()) {
             String ptype = pv.asType().toString();
@@ -123,58 +117,25 @@ public class UrldocElementVisitor extends AbstractElementVisitor8<Object, Object
         return new ArrayList(this.mappingList);
     }
 
-    private Mapping createMapping(RequestMapping rm, String[] basePaths, String doc) {
+    private Mapping createMapping(String[] methods,String[] paths, String[] values, String[] basePaths, String doc, String controller) {
         Mapping mp = new Mapping();
         mp.setDoc(doc);
-        RequestMethod[] methods = rm.method();
+        mp.setController(controller);
         if (methods.length == 0) {
             mp.addMethod("ANY");
         } else {
-            for (RequestMethod m : methods) {
-                mp.addMethod(m.name());
+            for (String m : methods) {
+                mp.addMethod(m);
             }
         }
         for (String bp : basePaths) {
-            for (String p : rm.path()) {
+            for (String p : paths) {
                 mp.addPath(path(bp, p));
             }
-            for (String p : rm.value()) {
+            for (String p : values) {
                 mp.addPath(path(bp, p));
             }
         }
-
-        return mp;
-    }
-
-    private Mapping createMapping(PostMapping pm, String[] basePaths, String doc) {
-        Mapping mp = new Mapping();
-        mp.setDoc(doc);
-        mp.addMethod(RequestMethod.POST.name());
-        for (String b : basePaths) {
-            for (String p : pm.path()) {
-                mp.addPath(path(b, p));
-            }
-            for (String p : pm.value()) {
-                mp.addPath(path(b, p));
-            }
-        }
-
-        return mp;
-    }
-
-    private Mapping createMapping(GetMapping gm, String[] basePaths, String doc) {
-        Mapping mp = new Mapping();
-        mp.setDoc(doc);
-        mp.addMethod(RequestMethod.GET.name());
-        for (String b : basePaths) {
-            for (String p : gm.path()) {
-                mp.addPath(path(b, p));
-            }
-            for (String p : gm.value()) {
-                mp.addPath(path(b, p));
-            }
-        }
-
         return mp;
     }
 

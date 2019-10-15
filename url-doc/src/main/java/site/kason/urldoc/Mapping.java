@@ -18,6 +18,8 @@ public class Mapping {
   
   private String doc;
 
+  private String controller;
+
   public Mapping() {
   }
   
@@ -58,7 +60,13 @@ public class Mapping {
   public void setDoc(String doc) {
     this.doc = doc;
   }
-  
-  
+
+  public String getController() {
+    return controller;
+  }
+
+  public void setController(String controller) {
+    this.controller = controller;
+  }
 
 }
